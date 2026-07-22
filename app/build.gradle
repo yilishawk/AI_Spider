@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -21,12 +22,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = '17'
+    
+    // 关键修改：kotlinOptions 需要在 android 块内，但使用新的语法
+    kotlin {
+        jvmToolchain(17)
     }
 }
 
@@ -36,9 +40,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.google.code.gson:gson:2.10.1'
-
-    // 编译期依赖，给 Java compile task 用（AGP 8.x + Kotlin 混合项目）
-    implementation 'androidx.annotation:annotation:1.7.1'
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
-    implementation 'org.apache.commons:commons-codec:1.16.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
 }
