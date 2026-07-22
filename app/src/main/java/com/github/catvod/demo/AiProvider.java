@@ -17,9 +17,15 @@ public class AiProvider {
             .build();
 
     public String callAi(String apiUrl, String apiKey, String model, String prompt) throws IOException {
-        String url = apiUrl.endsWith("/") ? apiUrl.substring(0, apiUrl.length() - 1) : apiUrl;
-        if (!url.contains("/chat/completions")) {
-            url += "/v1/chat/completions";
+        String base = apiUrl.endsWith("/") ? apiUrl.substring(0, apiUrl.length() - 1) : apiUrl;
+        
+        // Agnes AI 等平台只到 /v1，需要追加 /chat/completions
+        if (!base.contains("/chat/completions")) {
+            if (base.endsWith("/v1") || base.endsWith("/v1/")) {
+                base = base + "/chat/completions";
+            } else {
+                base = base + "/v1/chat/completions";
+            }
         }
 
         String jsonBody = "{" +
@@ -33,7 +39,7 @@ public class AiProvider {
                 "}";
 
         Request request = new Request.Builder()
-                .url(url)
+                .url(base)
                 .addHeader("Authorization", "Bearer " + apiKey)
                 .addHeader("Content-Type", "application/json")
                 .post(RequestBody.create(MediaType.parse("application/json"), jsonBody))
@@ -41,7 +47,8 @@ public class AiProvider {
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new IOException("AI API 返回错误: " + response.code());
+                String errorBody = response.body() != null ? response.body().string() : "";
+                throw new IOException("AI API 返回错误: " + response.code() + " - " + errorBody);
             }
             String responseBody = response.body() != null ? response.body().string() : "";
             return extractAssistantMessage(responseBody);
