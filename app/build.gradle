@@ -36,4 +36,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // 编译期依赖，给 Java compile task 用（AGP 8.x + Kotlin 混合项目）
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation 'org.apache.commons:commons-codec:1.16.1'
 }
