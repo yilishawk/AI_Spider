@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -42,7 +43,11 @@ public class AiProvider {
                 return null;
             }
             String responseBody = response.body() != null ? response.body().string() : "";
-            return new JSONObject(responseBody);
+            try {
+                return new JSONObject(responseBody);
+            } catch (JSONException e) {
+                return null;
+            }
         }
     }
 
