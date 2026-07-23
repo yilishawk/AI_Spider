@@ -33,7 +33,7 @@ public class CodeGeneratorService {
     public String readCodeFile(String fileName) throws IOException {
         File file = new File(context.getFilesDir(), fileName);
         StringBuilder sb = new StringBuilder();
-        try (java.io.BufferedReader reader = new java.io.BufferedReader(new FileReader(file))) {
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line).append("\n");
