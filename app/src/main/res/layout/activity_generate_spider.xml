@@ -1,29 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/sv_output">
+    android:orientation="vertical"
+    android:padding="12dp">
 
+    <!-- 顶部标题栏：AI 标签 + 编辑按钮 + 测试按钮 -->
     <LinearLayout
+        android:id="@+id/ll_ai_status_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tv_ai_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="未配置 AI"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#4A90E2" />
+
+        <Button
+            android:id="@+id/btn_edit_ai"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="编辑"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btn_test_ai"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="测试"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- AI 配置面板（默认隐藏） -->
+    <LinearLayout
+        android:id="@+id/ll_ai_config"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AI Spider Generator"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <!-- AI API 配置 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="AI API 配置"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp" />
+        android:padding="12dp"
+        android:background="#F5F5F5"
+        android:visibility="gone"
+        android:layout_marginTop="8dp">
 
         <EditText
             android:id="@+id/et_api_url"
@@ -45,82 +69,128 @@
             android:layout_height="wrap_content"
             android:hint="Model (如 gpt-4, deepseek-chat)" />
 
-        <!-- 网站代码输入 -->
-        <TextView
+        <Button
+            android:id="@+id/btn_save_ai"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="保存配置" />
+    </LinearLayout>
+
+    <!-- 状态提示 -->
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#666"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone" />
+
+    <!-- 网站代码输入区 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="网站代码/API 信息"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp" />
+
+    <EditText
+        android:id="@+id/et_website_code"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:hint="请粘贴网站源代码或 API 信息..."
+        android:gravity="top|start"
+        android:inputType="textMultiLine"
+        android:scrollbars="vertical"
+        android:layout_marginTop="4dp"
+        android:background="@android:drawable/edit_text" />
+
+    <!-- 密码门禁选项 -->
+    <LinearLayout
+        android:id="@+id/ll_password_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:layout_marginTop="8dp">
+
+        <CheckBox
+            android:id="@+id/cb_add_password"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="网站代码/API 信息"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp" />
+            android:text="添加密码门禁" />
+    </LinearLayout>
+
+    <!-- 生成与操作按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <Button
+            android:id="@+id/btn_generate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="生成爬虫" />
+
+        <Button
+            android:id="@+id/btn_reset"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="重置"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- 结果区域 -->
+    <ScrollView
+        android:id="@+id/sv_result"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="12dp"
+        android:visibility="gone">
 
         <EditText
-            android:id="@+id/et_website_code"
+            android:id="@+id/et_generated_code"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:hint="请粘贴网站源代码或 API 信息..."
+            android:layout_height="wrap_content"
+            android:minHeight="300dp"
             android:gravity="top|start"
             android:inputType="textMultiLine"
-            android:scrollbars="vertical" />
+            android:editable="false"
+            android:focusable="false"
+            android:scrollbars="vertical"
+            android:background="@android:drawable/editbox_background" />
+    </ScrollView>
 
-        <!-- 密码门禁选项 -->
-        <LinearLayout
-            android:id="@+id/ll_password_layout"
-            android:layout_width="match_parent"
+    <!-- 操作按钮 -->
+    <LinearLayout
+        android:id="@+id/ll_action_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_marginTop="8dp">
+
+        <Button
+            android:id="@+id/btn_copy"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="8dp"
-            android:background="#F5F5F5">
+            android:layout_weight="1"
+            android:text="复制代码" />
 
-            <CheckBox
-                android:id="@+id/cb_add_password"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="添加密码门禁"
-                android:checked="false" />
-
-            <Button
-                android:id="@+id/btn_toggle_password"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="设置密码" />
-        </LinearLayout>
-
-        <!-- 按钮 -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/btn_download"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
-
-            <Button
-                android:id="@+id/btn_generate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="生成爬虫" />
-
-            <Button
-                android:id="@+id/btn_reset"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="重置"
-                android:layout_marginStart="8dp" />
-        </LinearLayout>
-
-        <!-- 状态显示 -->
-        <ProgressBar
-            android:id="@+id/pb_progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/tv_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="等待输入..."
-            android:textColor="#666" />
-
+            android:layout_weight="1"
+            android:text="下载文件"
+            android:layout_marginStart="8dp" />
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>

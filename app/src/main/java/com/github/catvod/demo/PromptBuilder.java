@@ -5,7 +5,10 @@ package com.github.catvod.demo;
  */
 public class PromptBuilder {
 
-    public String buildPrompt(String websiteCode, boolean addPassword) {
+    /**
+     * 构建 Prompt 给 AI 生成 Java Spider 代码
+     */
+    public static String buildPrompt(String websiteCode, boolean addPassword) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("请根据以下网站代码/API信息，生成一个符合 CatVodSpider 框架的 Java Spider 类。\n\n");
 

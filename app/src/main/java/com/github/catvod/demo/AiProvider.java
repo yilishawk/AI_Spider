@@ -6,27 +6,50 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 /**
  * AI Provider - 统一调用 OpenAI 兼容 API
  */
 public class AiProvider {
 
-    private static final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-            .readTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
-            .build();
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    public String callAi(String apiUrl, String apiKey, String model, String prompt) throws IOException {
-        String base = apiUrl.endsWith("/") ? apiUrl.substring(0, apiUrl.length() - 1) : apiUrl;
-        
-        // Agnes AI 等平台只到 /v1，需要追加 /chat/completions
-        if (!base.contains("/chat/completions")) {
-            if (base.endsWith("/v1") || base.endsWith("/v1/")) {
-                base = base + "/chat/completions";
-            } else {
-                base = base + "/v1/chat/completions";
+    /**
+     * 测试 AI 连接
+     */
+    public JSONObject testConnection(OkHttpClient client, String apiUrl, String apiKey, String model) throws IOException {
+        String url = buildUrl(apiUrl);
+
+        String jsonBody = "{" +
+                "\"model\":\"" + escapeJson(model) + "\"," +
+                "\"messages\":[" +
+                "{\"role\":\"user\",\"content\":\"ping\"}" +
+                "]," +
+                "\"max_tokens\":10" +
+                "}";
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + apiKey)
+                .addHeader("Content-Type", "application/json")
+                .post(RequestBody.create(JSON, jsonBody))
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                return null;
             }
+            String responseBody = response.body() != null ? response.body().string() : "";
+            return new JSONObject(responseBody);
         }
+    }
+
+    /**
+     * 调用 AI 生成代码
+     */
+    public String callAi(OkHttpClient client, String apiUrl, String apiKey, String model, String prompt) throws IOException {
+        String url = buildUrl(apiUrl);
 
         String jsonBody = "{" +
                 "\"model\":\"" + escapeJson(model) + "\"," +
@@ -39,10 +62,10 @@ public class AiProvider {
                 "}";
 
         Request request = new Request.Builder()
-                .url(base)
+                .url(url)
                 .addHeader("Authorization", "Bearer " + apiKey)
                 .addHeader("Content-Type", "application/json")
-                .post(RequestBody.create(MediaType.parse("application/json"), jsonBody))
+                .post(RequestBody.create(JSON, jsonBody))
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -55,7 +78,59 @@ public class AiProvider {
         }
     }
 
+    /**
+     * 清理 AI 返回的代码（去除 markdown 包裹）
+     */
+    public String cleanCode(String code) {
+        if (code == null || code.isEmpty()) return "";
+
+        // 去除 ```java ... ``` 或 ``` ... ``` 包裹
+        if (code.startsWith("```")) {
+            code = code.substring(3);
+            if (code.startsWith("\n") || code.startsWith("\r")) {
+                code = code.substring(1);
+            }
+            if (code.endsWith("```")) {
+                code = code.substring(0, code.length() - 3);
+                if (code.endsWith("\n") || code.endsWith("\r")) {
+                    code = code.substring(0, code.length() - 1);
+                }
+            }
+        }
+
+        return code.trim();
+    }
+
+    /**
+     * 构建完整 URL（处理不同平台的 URL 格式）
+     */
+    private String buildUrl(String baseUrl) {
+        if (baseUrl.endsWith("/") && !baseUrl.contains("/chat/completions")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+
+        if (baseUrl.contains("/chat/completions")) {
+            return baseUrl;
+        } else if (baseUrl.endsWith("/v1")) {
+            return baseUrl + "/chat/completions";
+        } else {
+            return baseUrl + "/v1/chat/completions";
+        }
+    }
+
     private String extractAssistantMessage(String json) {
+        try {
+            JSONObject obj = new JSONObject(json);
+            JSONArray choices = obj.getJSONArray("choices");
+            if (choices.length() > 0) {
+                JSONObject firstChoice = choices.getJSONObject(0);
+                JSONObject message = firstChoice.getJSONObject("message");
+                return message.getString("content");
+            }
+        } catch (Exception e) {
+            // Fallback to simple parsing
+        }
+
         int start = json.indexOf("\"content\":\"");
         if (start == -1) return "";
         start += 11;

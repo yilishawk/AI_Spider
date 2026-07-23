@@ -1,7 +1,6 @@
 package com.github.catvod.demo;
 
 import android.content.Context;
-import android.os.Environment;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,37 +11,41 @@ import java.io.IOException;
 public class CodeGeneratorService {
 
     private Context context;
-    private File outputDir;
 
     public CodeGeneratorService(Context context) {
         this.context = context;
-        this.outputDir = getOutputDirectory();
     }
 
-    private File getOutputDirectory() {
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            return new File(context.getExternalFilesDir(null), "spiders");
-        } else {
-            return new File(context.getFilesDir(), "spiders");
-        }
-    }
-
-    public void saveGeneratedCode(String code) throws IOException {
-        if (!outputDir.exists()) {
-            outputDir.mkdirs();
-        }
-
-        String fileName = generateFilename();
-        File file = new File(outputDir, fileName);
-
+    /**
+     * 保存到内部存储
+     */
+    public File saveToInternalStorage(String code, String fileName) throws IOException {
+        File file = new File(context.getFilesDir(), fileName);
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(code);
         }
-
-        System.out.println("已保存: " + file.getAbsolutePath());
+        return file;
     }
 
-    private String generateFilename() {
-        return "spider_" + System.currentTimeMillis() + ".java";
+    /**
+     * 读取已保存的代码文件
+     */
+    public String readCodeFile(String fileName) throws IOException {
+        File file = new File(context.getFilesDir(), fileName);
+        StringBuilder sb = new StringBuilder();
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 获取保存目录的完整路径
+     */
+    public File getOutputDirectory() {
+        return context.getFilesDir();
     }
 }
